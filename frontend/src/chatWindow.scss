@@ -1,0 +1,24 @@
+.chatWindow {
+    border: 1px solid black;
+    border-radius: 5px;
+    padding: 5px;
+
+    &--nameAndInput {
+        border-bottom: 1px solid black;
+        display: flex;
+        input[type='text'] {
+            margin: 5px;
+            padding: 5px;
+            border: 1px solid black;
+        }
+        button {
+            border: 1px solid black;
+            border-radius: 5px;
+            padding: 5px;
+        }
+    }
+}
+
+.messages {
+    padding: 5px;
+}
