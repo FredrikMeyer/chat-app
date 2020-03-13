@@ -13,18 +13,24 @@ import { WebSocketLink } from 'apollo-link-ws';
 import { split } from 'apollo-link';
 import { getMainDefinition } from 'apollo-utilities';
 
+console.log(process.env.NODE_ENV)
+
+const hostAndPort = `${process.env.REACT_APP_BACKEND_HOST}:${process.env.REACT_APP_BACKEND_PORT}`
+const wsProtocol = process.env.NODE_ENV === 'production' ? 'wss' : 'ws'
+const httpProtocol = process.env.NODE_ENV === 'production' ? 'https' : 'http'
+
 const wsLink = new WebSocketLink({
-    uri: `ws://10.0.1.16:8888/ws`,
+    uri: `${wsProtocol}://${hostAndPort}/ws`,
     options: {
         reconnect: true
     }
 });
 
 const httpLink = new HttpLink({
-    uri: 'http://10.0.1.16:8888/graphql',
+    uri: `${httpProtocol}://${hostAndPort}/graphql`,
     credentials: 'same-origin'
 })
-
+ 
 const link = split(
     // split based on operation type
     ({ query }) => {

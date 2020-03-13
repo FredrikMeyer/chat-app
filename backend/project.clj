@@ -10,7 +10,12 @@
                  [io.pedestal/pedestal.route "0.5.7"]
                  [io.pedestal/pedestal.jetty "0.5.7"]
                  [org.slf4j/slf4j-simple "1.7.28"]
+                 [yogthos/config "1.1.7"]
                  ]
   :main ^:skip-aot chat-app.core
   :target-path "target/%s"
-  :profiles {:uberjar {:aot :all}})
+  :profiles {:prod {:resource-paths ["config/prod"]}
+             :dev {:resource-paths ["config/dev"]}
+             :uberjar {:aot :all}
+             }
+  )

@@ -8,6 +8,7 @@
             [com.walmartlabs.lacinia.util :as util]
             [clojure.edn :as edn]
             [clojure.java.io :as io]
+            [config.core :refer [env]]
             [chat-app.id :as id]))
 
 ;; GraphQL
@@ -41,23 +42,12 @@
       (let [obj (<! subscriber)]
         (if (some? obj) ;; Had to do this to avoid infinite loop
           (do
-            (println "message" obj)
             (source-stream (:msg obj))
             (recur))
           (source-stream nil))))
     (fn []
       (unsub publication :new-msg subscriber)
       (close! subscriber))))
-
-
-(def current-msg (atom nil))
-(defn message-streamer
-  [context args source-stream]
-  (add-watch current-msg :msg
-             (fn [key atom old-state new-state]
-               (source-stream new-state)))
-  #((fn [] (reset! current-msg nil))))
-
 
 (def schema (-> "schema.edn"
                 io/resource
@@ -67,7 +57,6 @@
 (def messages (atom []))
 (defn post-message! [message]
   (swap! messages (fn [old-msgs] (conj old-msgs message)))
-  (reset! current-msg message)
   (>!! msg-chan {:topic :new-msg :msg message})
   message)
 
@@ -104,7 +93,7 @@
           (-> service-map
               (merge {
                       ::http/join? false
-                      ::http/host "10.0.1.16"
+                      ::http/host (:host env)
                       ::http/allowed-origins {:creds true :allowed-origins (constantly true)}
                       })
               http/default-interceptors
@@ -124,4 +113,5 @@
 (defn -main
   "I don't do a whole lot ... yet."
   [& args]
-  (println "Hello, World!"))
+  (println "Starting server.")
+  (start-dev))
