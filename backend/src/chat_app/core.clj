@@ -34,7 +34,7 @@
 (def publication
   (pub msg-chan #(:topic %)))
 
-(defn message-streamer2
+(defn message-streamer
   [context args source-stream]
   (let [subscriber (chan)]
     (sub publication :new-msg subscriber)
@@ -75,7 +75,7 @@
                                                                           })))
                               })
       (util/attach-streamers {:subscriptions/ticks ticks-streamer
-                              :subscriptions/messages message-streamer2})
+                              :subscriptions/messages message-streamer})
       schema/compile
       (lacinia/service-map {:graphiql true
                             :path "/graphql"
@@ -94,6 +94,7 @@
               (merge {
                       ::http/join? false
                       ::http/host (:host env)
+                      ::http/port (:port env)
                       ::http/allowed-origins {:creds true :allowed-origins (constantly true)}
                       })
               http/default-interceptors
@@ -113,5 +114,5 @@
 (defn -main
   "I don't do a whole lot ... yet."
   [& args]
-  (println "Starting server.")
+  (println "Starting server. Port: " (:port env) ". Host: " (:host env))
   (start-dev))

@@ -1,8 +1,8 @@
-FROM openjdk:8u181-alpine3.8
-
-WORKDIR /
-
-COPY ./target/uberjar/chat-app-0.1.0-SNAPSHOT-standalone.jar chat-app.jar
-EXPOSE 8888
-
-CMD java -jar chat-app.jar
+FROM clojure
+RUN mkdir -p /usr/src/app
+WORKDIR /usr/src/app
+COPY project.clj /usr/src/app/
+RUN lein deps
+COPY . /usr/src/app
+RUN mv "$(lein with-profile prod uberjar | sed -n 's/^Created \(.*standalone\.jar\)/\1/p')" app-standalone.jar
+CMD ["java", "-jar", "app-standalone.jar"]
