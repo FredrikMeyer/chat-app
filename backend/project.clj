@@ -10,6 +10,7 @@
                  [io.pedestal/pedestal.route "0.5.7"]
                  [io.pedestal/pedestal.jetty "0.5.7"]
                  [org.slf4j/slf4j-simple "1.7.28"]
+                 [com.taoensso/carmine "2.19.1"]
                  [yogthos/config "1.1.7"]
                  ]
   :main ^:skip-aot chat-app.core

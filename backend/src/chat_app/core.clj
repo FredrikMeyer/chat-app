@@ -9,7 +9,36 @@
             [clojure.edn :as edn]
             [clojure.java.io :as io]
             [config.core :refer [env]]
+            [taoensso.carmine :as car :refer (wcar)]
             [chat-app.id :as id]))
+
+
+(def msg-chan (chan))
+
+;; Redis
+
+(defn redis-server []
+  {:pool {}
+   :spec {:uri (str  "redis://" (:redis-host env) ":" (:redis-port env) "/")}})
+
+(defmacro wcar* [& body] `(car/wcar (redis-server) ~@body))
+
+(defn set-key [value]
+  (wcar* (car/set "somekey" value)))
+
+(defn get-key []
+  (wcar* (car/get "somekey")))
+
+(defn listen-to-messages []
+  (car/with-new-pubsub-listener (:spec (redis-server))
+    {
+     "chat-msg" (fn f1 [msg]
+                  (println "received msg: " msg)
+                  (>!! msg-chan {:topic :new-msg :msg msg})
+                  )
+     }
+    (car/subscribe "chat-msg")
+    ))
 
 ;; GraphQL
 
@@ -30,7 +59,6 @@
     ;; Cleanup:
     #(close! abort-ch)))
 
-(def msg-chan (chan))
 (def publication
   (pub msg-chan #(:topic %)))
 
@@ -57,7 +85,7 @@
 (def messages (atom []))
 (defn post-message! [message]
   (swap! messages (fn [old-msgs] (conj old-msgs message)))
-  (>!! msg-chan {:topic :new-msg :msg message})
+  (wcar* (car/publish "chat-msg" message))
   message)
 
 (def service-map
@@ -73,6 +101,10 @@
                                                                           :from frm
                                                                           :id (id/generate-id!)
                                                                           })))
+                              :mutation/set-redis-var! (fn [_ arguments _]
+                                                         (let [val (:value arguments)]
+                                                           (set-key val)))
+                              :query/get-key (fn [_ _ _] (get-key))
                               })
       (util/attach-streamers {:subscriptions/ticks ticks-streamer
                               :subscriptions/messages message-streamer})
@@ -89,6 +121,7 @@
 (defonce server (atom nil))
 
 (defn start-dev []
+  (listen-to-messages)
   (reset! server
           (-> service-map
               (merge {

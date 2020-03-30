@@ -26,6 +26,11 @@
    :type String
    :resolve :query/hello
    }
+  :getRedisKey
+  {
+   :type String
+   :resolve :query/get-key
+   }
   }
 
  :mutations
@@ -44,6 +49,17 @@
               }
     }
    :resolve :mutation/post-message!
+   }
+  :setVarRedis
+  {
+   :type String
+   :args
+   {
+    :value {
+            :type String
+            }
+    }
+   :resolve :mutation/set-redis-var!
    }
   }
 

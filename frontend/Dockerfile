@@ -1,13 +1,17 @@
-FROM node:12.2.0-alpine
+FROM node:12.2.0-alpine as build
 
 WORKDIR /app
 
-ENV PATH /app/node_modules/.bin:$PATH
-
 COPY package.json /app/package.json
-RUN yarn install --silent
+RUN yarn install
+COPY . /app
 
-EXPOSE 8888
+RUN yarn build
 
-# start app
-CMD ["yarn", "start"]
+## Production
+
+FROM node:12.2.0-alpine
+RUN yarn global add serve 
+WORKDIR /app
+COPY --from=build /app/build .
+CMD ["serve","-s", "-l", "8080", "-s", "."]
