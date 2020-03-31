@@ -22,6 +22,7 @@ jobs:
           with:
               node-version: '12.x'
         - run: yarn install
+          working-directory: ./frontend
     deploy:
         needs: build
         name: Deploy
@@ -30,6 +31,7 @@ jobs:
             - name: Checkout master
               uses: actions/checkout@master
             - name: deploy firebase
+              working-directory: ./frontend
               uses: w9jds/firebase-action@master
               with:
                   args: deploy --only hosting
