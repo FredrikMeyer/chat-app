@@ -27,6 +27,6 @@ jobs:
           uses: w9jds/firebase-action@master
           with:
               args: deploy --only hosting
-              env:
-                  FIREBASE_TOKEN: ${{ secrets.FIREBASE_TOKEN }}
-                  PROJECT_PATH: ./frontend
+          env:
+              FIREBASE_TOKEN: ${{ secrets.FIREBASE_TOKEN }}
+              PROJECT_PATH: ./frontend
