@@ -24,6 +24,7 @@ jobs:
         - run: yarn install
           working-directory: ./frontend
         - run: yarn build
+          working-directory: ./frontend
         - name: Archive artifact
           uses: actions/upload-artifact@master
           with:
