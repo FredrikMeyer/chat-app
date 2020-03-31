@@ -23,6 +23,7 @@ jobs:
               node-version: '12.x'
         - run: yarn install
           working-directory: ./frontend
+        - run: yarn build
         - name: Archive artifact
           uses: actions/upload-artifact@master
           with:
