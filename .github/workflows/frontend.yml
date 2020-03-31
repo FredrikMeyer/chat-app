@@ -9,10 +9,10 @@ on:
         branches:
             - master
         paths:
-            - 'frontend/'
+            - 'frontend/**'
     pull_request:
         paths:
-            - 'frontend/'
+            - 'frontend/**'
     
 jobs:
     build:
