@@ -33,9 +33,9 @@
   (car/with-new-pubsub-listener (:spec (redis-server))
     {
      "chat-msg" (fn f1 [msg]
-                  (println "received msg: " msg)
-                  (>!! msg-chan {:topic :new-msg :msg msg})
-                  )
+                  (let [[_ _ message-object] msg]
+                    (println "received msg: " message-object)
+                    (>!! msg-chan {:topic :new-msg :msg message-object})))
      }
     (car/subscribe "chat-msg")
     ))
@@ -53,7 +53,6 @@
             (source-stream {:count countdown :time-ms (System/currentTimeMillis)})
             (alt!
               abort-ch nil
-
               (timeout 1000) (recur (dec countdown))))
           (source-stream nil))))
     ;; Cleanup:
@@ -83,6 +82,7 @@
                 edn/read-string))
 
 (def messages (atom []))
+
 (defn post-message! [message]
   (swap! messages (fn [old-msgs] (conj old-msgs message)))
   (wcar* (car/publish "chat-msg" message))
