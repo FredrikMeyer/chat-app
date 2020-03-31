@@ -23,6 +23,11 @@ jobs:
               node-version: '12.x'
         - run: yarn install
           working-directory: ./frontend
+        - name: Archive artifact
+          uses: actions/upload-artifact@master
+          with:
+              name: dist
+              path: build
     deploy:
         needs: build
         name: Deploy
@@ -30,8 +35,11 @@ jobs:
         steps:
             - name: Checkout master
               uses: actions/checkout@master
+            - name: Download artifact
+              uses: actions/download-artifact@master
+              with:
+                  name: dist
             - name: deploy firebase
-              working-directory: ./frontend
               uses: w9jds/firebase-action@master
               with:
                   args: deploy --only hosting
