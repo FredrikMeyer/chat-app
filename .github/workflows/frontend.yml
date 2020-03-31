@@ -20,3 +20,4 @@ jobs:
           with:
               node-version: '12.x'
         - run: yarn install
+          working-directory: ./frontend
