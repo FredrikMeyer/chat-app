@@ -10,14 +10,11 @@ on:
             - master
         paths:
             - 'frontend/**'
-    pull_request:
-        paths:
-            - 'frontend/**'
     
 jobs:
     build:
         runs-on: ubuntu-latest
-
+        name: Build
         steps:
         - uses: actions/checkout@v2
         - name: Use node
@@ -25,3 +22,16 @@ jobs:
           with:
               node-version: '12.x'
         - run: yarn install
+    deploy:
+        needs: build
+        name: Deploy
+        runs-on: ubuntu-latest
+        steps:
+            - name: Checkout master
+              uses: actions/checkout@master
+            - name: deploy firebase
+              uses: w9jds/firebase-action@master
+              with:
+                  args: deploy --only hosting
+              env:
+                  FIREBASE_TOKEN: ${{ secrets.FIREBASE_TOKEN }}
