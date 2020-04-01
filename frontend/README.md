@@ -1,18 +1,6 @@
 # chat-app-frontend
 
-To build:
-
-```
-docker build -t chat-frontend:dev .
-```
-
-See the Dockerfile for what is actually built.
-
-To run:
-```
-docker run -it -v ${PWD}:/app -v /app/node_modules -p 3001:3000 --rm chat-frontend:dev
-```
-
+The frontend. See below for options:
 
 ## Available Scripts
 
