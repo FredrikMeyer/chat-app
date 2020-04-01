@@ -1,0 +1,27 @@
+name: backend-deploy
+
+on:
+    push:
+        branches:
+            - master
+        paths:
+            - 'backend/**'
+    
+jobs:
+    deploy:
+        runs-on: ubuntu-latest
+        name: Deploy backend
+        steps:
+            - name: Initialize Google Cloud SDK
+              uses: zxyle/publish-gae-action@master
+              with:
+                  service_account_email: ${{ secrets.GAE_SA_EMAIL }}
+                  service_account_key: ${{ secrets.GAE_SA_KEY }}
+                  project_id: gifted-antonym-271008
+            - name: Publish app to Google App Engine
+              working-directory: ./backend
+              run: |
+                  # This client-secret.json is converted by GCP_SA_KEY.
+                  gcloud auth activate-service-account ${{ secrets.GCP_SA_EMAIL }} --key-file=../client-secret.json
+                  gcloud config set project ${{ secrets.PROJECT_ID }}
+                  gcloud -q app deploy app.yaml --promote

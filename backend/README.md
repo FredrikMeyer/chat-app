@@ -11,6 +11,7 @@ To run:
 docker run -it -p 8888:8888 chat-app-backend
 ```
 
+(this to change)
 
 ## Config
 
