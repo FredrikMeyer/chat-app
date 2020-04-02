@@ -1,15 +1,15 @@
 (ns chat-app.core
   (:gen-class)
   (:require [io.pedestal.http :as http]
-            [io.pedestal.http.route :as route]
-            [clojure.core.async :refer [chan close! go go-loop alt! timeout >! <! >!! pub sub unsub]]
+            [clojure.core.async :refer [chan close! go-loop <! >!! pub sub unsub]]
             [com.walmartlabs.lacinia.pedestal :as lacinia]
             [com.walmartlabs.lacinia.schema :as schema]
             [com.walmartlabs.lacinia.util :as util]
             [clojure.edn :as edn]
             [clojure.java.io :as io]
             [config.core :refer [env]]
-            [taoensso.carmine :as car :refer (wcar)]
+            [taoensso.carmine :as car]
+            [clojure.tools.logging :as log]
             [chat-app.id :as id]))
 
 
@@ -34,7 +34,7 @@
     {
      "chat-msg" (fn f1 [msg]
                   (let [[_ _ message-object] msg]
-                    (println "received msg: " message-object)
+                    (log/info "received msg: " message-object)
                     (>!! msg-chan {:topic :new-msg :msg message-object})))
      }
     (car/subscribe "chat-msg")
@@ -42,27 +42,11 @@
 
 ;; GraphQL
 
-;; ticks
-(defn ticks-streamer
-  [_ args source-stream]
-  (let [abort-ch (chan)]
-    (go
-      (loop [countdown (-> args :count dec)]
-        (if (<= 0 countdown)
-          (do
-            (source-stream {:count countdown :time-ms (System/currentTimeMillis)})
-            (alt!
-              abort-ch nil
-              (timeout 1000) (recur (dec countdown))))
-          (source-stream nil))))
-    ;; Cleanup:
-    #(close! abort-ch)))
-
 (def publication
   (pub msg-chan #(:topic %)))
 
 (defn message-streamer
-  [context args source-stream]
+  [_ _ source-stream]
   (let [subscriber (chan)]
     (sub publication :new-msg subscriber)
     (go-loop []
@@ -73,6 +57,7 @@
             (recur))
           (source-stream nil))))
     (fn []
+      (log/info "Client disconnected.")
       (unsub publication :new-msg subscriber)
       (close! subscriber))))
 
@@ -106,8 +91,7 @@
                                                            (set-key val)))
                               :query/get-key (fn [_ _ _] (get-key))
                               })
-      (util/attach-streamers {:subscriptions/ticks ticks-streamer
-                              :subscriptions/messages message-streamer})
+      (util/attach-streamers {:subscriptions/messages message-streamer})
       schema/compile
       (lacinia/service-map {:graphiql true
                             :path "/graphql"
@@ -128,7 +112,10 @@
                       ::http/join? false
                       ::http/host (:host env)
                       ::http/port (:port env)
-                      ::http/allowed-origins {:creds true :allowed-origins (constantly true)}
+                      ::http/allowed-origins {
+                                              :creds true
+                                              :allowed-origins (constantly true)
+                                              }
                       })
               http/default-interceptors
               http/create-server
@@ -147,5 +134,5 @@
 (defn -main
   "I don't do a whole lot ... yet."
   [& args]
-  (println "Starting server. Port: " (:port env) ". Host: " (:host env))
+  (log/info "Starting server. Port: " (:port env) ". Host: " (:host env))
   (start-dev))
