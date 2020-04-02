@@ -1,6 +1,8 @@
 # chat-app
 
-A simple chat app in Clojure (backend) and React+Typescript (frontend). Hosted at [Firebase](https://gifted-antonym-271008.firebaseapp.com/).
+A simple chat app in Clojure (backend) and React+Typescript (frontend). The frontend is hosted at [Firebase](https://gifted-antonym-271008.firebaseapp.com/), the backend is hosted at Google App Engine.
+
+The backend uses Redis pub/sub to synchronize the two or more instances running the app on GAE.
 
 ## Frontend
 
