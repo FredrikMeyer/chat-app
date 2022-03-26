@@ -19,7 +19,7 @@
     "apollo-link-ws": "^1.0.19",
     "graphql": "^14.6.0",
     "graphql-tag": "^2.10.3",
-    "node-sass": "^4.13.1",
+    "node-sass": "^7.0.0",
     "react": "^16.13.0",
     "react-dom": "^16.13.0",
     "react-scripts": "3.4.0",
